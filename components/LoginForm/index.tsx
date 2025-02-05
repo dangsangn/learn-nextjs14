@@ -14,11 +14,16 @@ import {
 } from "@/components/ui/form"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
+import { signIn } from "next-auth/react"
+import { authenticate } from "@/lib/actions"
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  username: z
+    .string()
+    .min(2, {
+      message: "Username must be at least 2 characters.",
+    })
+    .email(),
   password: z.string().min(6),
 })
 
@@ -33,10 +38,11 @@ export function LoginForm() {
   })
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values)
+    await authenticate(values.username, values.password)
   }
 
   return (
@@ -63,7 +69,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="" {...field} />
+                <Input type="password" placeholder="" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
