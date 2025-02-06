@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "../ui/input"
 import { Button } from "../ui/button"
+import Link from "next/link"
 
 const formSchema = z.object({
-  username: z.string().min(2, {
+  email: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
   password: z.string().min(6),
@@ -28,16 +29,33 @@ export function RegisterForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
       name: "",
     },
   })
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/v1/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({
+            ...values,
+          }),
+        }
+      )
+      const user = await response.json()
+      console.log("user:", user)
+    } catch (error) {
+      console.log("error:", error)
+    }
     console.log(values)
   }
 
@@ -60,10 +78,10 @@ export function RegisterForm() {
         />
         <FormField
           control={form.control}
-          name="username"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input placeholder="" {...field} />
               </FormControl>
@@ -85,6 +103,9 @@ export function RegisterForm() {
           )}
         />
         <Button type="submit">Submit</Button>
+        <div className="text-center">
+          <Link href="/login">Login</Link>
+        </div>
       </form>
     </Form>
   )

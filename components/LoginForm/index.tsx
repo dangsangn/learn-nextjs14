@@ -1,21 +1,20 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Input } from "../ui/input"
-import { Button } from "../ui/button"
-import { signIn } from "next-auth/react"
 import { authenticate } from "@/lib/actions"
+import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
 
 const formSchema = z.object({
   username: z
@@ -39,10 +38,14 @@ export function LoginForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-    await authenticate(values.username, values.password)
+    try {
+      await authenticate(values.username, values.password)
+    } catch (error: any) {
+      const message = error.message
+      if (message === "InactiveAccountError") {
+        //TODO:
+      }
+    }
   }
 
   return (
@@ -76,6 +79,9 @@ export function LoginForm() {
           )}
         />
         <Button type="submit">Submit</Button>
+        <div className="text-center">
+          <Link href="/register">Register</Link>
+        </div>
       </form>
     </Form>
   )
